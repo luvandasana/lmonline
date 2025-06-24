@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIMBO LA MASHATI [KARIAKOO]</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f5; /* Light gray background */
+        }
+        /* Sticky header */
+        .header-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        /* Custom scrollbar for cart */
+        .cart-items-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .cart-items-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .cart-items-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .cart-items-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section - Fixed/Sticky -->
+    <header class="header-sticky bg-white shadow-md py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <!-- Business Name/Logo -->
+            <h1 class="text-3xl font-bold text-gray-800 tracking-tight">CHIMBO LA MASHATI <span class="text-blue-600">[KARIAKOO]</span></h1>
+
+            <!-- Language Selector & Cart Icon -->
+            <div class="flex items-center space-x-6">
+                <!-- Language Selector -->
+                <div class="relative inline-block text-left">
+                    <button id="language-toggle-btn" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" type="button">
+                        <span id="current-language-display">English</span>
+                        <i class="fas fa-chevron-down ml-2 -mr-1 text-sm text-gray-400"></i>
+                    </button>
+                    <div id="language-dropdown" class="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hidden">
+                        <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="language-toggle-btn">
+                            <button class="language-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left rounded-md" data-lang="en">English</button>
+                            <button class="language-option block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left rounded-md" data-lang="sw">Kiswahili</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shopping Cart Icon -->
+                <div class="relative">
+                    <button id="cart-icon-btn" class="text-gray-700 hover:text-blue-600 focus:outline-none transition-transform duration-200 hover:scale-110">
+                        <i class="fas fa-shopping-cart text-2xl"></i>
+                        <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Category Filter Buttons -->
+        <div class="flex flex-wrap justify-center gap-4 mb-8">
+            <button class="category-btn bg-blue-600 text-white px-6 py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 active" data-category="all" data-en="All Categories" data-sw="Makundi Yote">All Categories</button>
+            <button class="category-btn bg-gray-200 text-gray-800 px-6 py-2 rounded-lg shadow-md hover:bg-gray-300 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500" data-category="short_sleeves" data-en="Short Sleeves" data-sw="Mikono Mifupi">Short Sleeves</button>
+            <button class="category-btn bg-gray-200 text-gray-800 px-6 py-2 rounded-lg shadow-md hover:bg-gray-300 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500" data-category="long_sleeves" data-en="Long Sleeves" data-sw="Mikono Mirefu">Long Sleeves</button>
+        </div>
+
+        <!-- Products Grid -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Product cards will be injected here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Image Magnification Modal -->
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[1000] hidden">
+        <div class="relative bg-white rounded-lg p-4 max-w-full max-h-full overflow-auto">
+            <button id="close-image-modal-btn" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-3xl font-bold focus:outline-none">&times;</button>
+            <img id="magnified-image" src="" alt="Magnified Shirt" class="max-w-full max-h-[80vh] rounded-md shadow-lg">
+        </div>
+    </div>
+
+    <!-- Shopping Cart Modal -->
+    <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-end z-[1000] hidden">
+        <div class="bg-white w-full sm:w-2/3 md:w-1/2 lg:w-1/3 h-full shadow-lg p-6 flex flex-col rounded-l-lg">
+            <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+                <h2 id="cart-title" class="text-2xl font-bold text-gray-800" data-en="Your Cart" data-sw="Mabaki Yako">Your Cart</h2>
+                <button id="close-cart-modal-btn" class="text-gray-600 hover:text-gray-900 text-3xl font-bold focus:outline-none">&times;</button>
+            </div>
+
+            <div id="cart-items-container" class="flex-grow overflow-y-auto my-4 space-y-4 pr-2">
+                <!-- Cart items will be injected here by JavaScript -->
+                <p id="empty-cart-message" class="text-gray-500 text-center" data-en="Your cart is empty." data-sw="Mabaki yako ni matupu.">Your cart is empty.</p>
+            </div>
+
+            <div class="pt-4 border-t border-gray-200">
+                <div class="flex justify-between items-center text-xl font-semibold mb-4">
+                    <span id="cart-total-label" data-en="Total:" data-sw="Jumla:">Total:</span>
+                    <span id="cart-total" class="text-blue-600">0 TZS</span>
+                </div>
+                <button id="checkout-whatsapp-btn" class="w-full bg-green-500 text-white py-3 rounded-lg text-lg font-semibold hover:bg-green-600 transition duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-green-400" data-en="Checkout via WhatsApp" data-sw="Maliza kwa WhatsApp">
+                    Checkout via WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let products = [];
+        let cart = [];
+        let currentLanguage = 'en'; // Default language is English
+
+        // Constants for pricing
+        const SHORT_SLEEVE_RETAIL_PRICE = 15000;
+        const SHORT_SLEEVE_WHOLESALE_PRICE = 9000;
+        const LONG_SLEEVE_RETAIL_PRICE = 16000;
+        const LONG_SLEEVE_WHOLESALE_PRICE = 12000;
+        const WHOLESALE_THRESHOLD = 3; // Number of shirts to qualify for wholesale price
+
+        // WhatsApp number
+        const WHATSAPP_NUMBER = '255763471818';
+
+        // DOM Elements
+        const productsGrid = document.getElementById('products-grid');
+        const cartIconBtn = document.getElementById('cart-icon-btn');
+        const cartBadge = document.getElementById('cart-badge');
+        const cartModal = document.getElementById('cart-modal');
+        const closeCartModalBtn = document.getElementById('close-cart-modal-btn');
+        const cartItemsContainer = document.getElementById('cart-items-container');
+        const cartTotalDisplay = document.getElementById('cart-total');
+        const emptyCartMessage = document.getElementById('empty-cart-message');
+        const checkoutWhatsappBtn = document.getElementById('checkout-whatsapp-btn');
+        const imageModal = document.getElementById('image-modal');
+        const magnifiedImage = document.getElementById('magnified-image');
+        const closeImageModalBtn = document.getElementById('close-image-modal-btn');
+        const languageToggleBtn = document.getElementById('language-toggle-btn');
+        const languageDropdown = document.getElementById('language-dropdown');
+        const currentLanguageDisplay = document.getElementById('current-language-display');
+
+        // Translations object
+        const translations = {
+            en: {
+                'All Categories': 'All Categories',
+                'Short Sleeves': 'Short Sleeves',
+                'Long Sleeves': 'Long Sleeves',
+                'Add to Cart': 'Add to Cart',
+                'Your Cart': 'Your Cart',
+                'Total:': 'Total:',
+                'Checkout via WhatsApp': 'Checkout via WhatsApp',
+                'Your cart is empty.': 'Your cart is empty.',
+                'English': 'English',
+                'Kiswahili': 'Kiswahili',
+                'Shirt Name': 'Shirt Name', // Generic for product name display
+                'Price:': 'Price:',
+                'Quantity:': 'Quantity:'
+            },
+            sw: {
+                'All Categories': 'Makundi Yote',
+                'Short Sleeves': 'Mikono Mifupi',
+                'Long Sleeves': 'Mikono Mirefu',
+                'Add to Cart': 'Ongeza kwenye Kikapu',
+                'Your Cart': 'Mabaki Yako',
+                'Total:': 'Jumla:',
+                'Checkout via WhatsApp': 'Maliza kwa WhatsApp',
+                'Your cart is empty.': 'Mabaki yako ni matupu.',
+                'English': 'Kiingereza',
+                'Kiswahili': 'Kiswahili',
+                'Shirt Name': 'Jina la Shati',
+                'Price:': 'Bei:',
+                'Quantity:': 'Idadi:'
+            }
+        };
+
+        /**
+         * Initializes product data with placeholder images.
+         * Generates a fixed number of products for demonstration.
+         */
+        function initializeProducts() {
+            products = [];
+            // Generate Short Sleeve Shirts
+            for (let i = 1; i <= 100; i++) { // 12 short sleeve shirts
+                products.push({
+                    id: `ss-${i}`,
+                    name: `Short Sleeve Shirt ${i}`,
+                    category: 'short_sleeves',
+                    retailPrice: SHORT_SLEEVE_RETAIL_PRICE,
+                    wholesalePrice: SHORT_SLEEVE_WHOLESALE_PRICE,
+                    imageUrl: `ss/ss (${i}).jpeg`
+                });
+            }
+            // Generate Long Sleeve Shirts
+            for (let i = 1; i <= 99; i++) { // 12 long sleeve shirts
+                products.push({
+                    id: `ls-${i}`,
+                    name: `Long Sleeve Shirt ${i}`,
+                    category: 'long_sleeves',
+                    retailPrice: LONG_SLEEVE_RETAIL_PRICE,
+                    wholesalePrice: LONG_SLEEVE_WHOLESALE_PRICE,
+                    imageUrl: `ll/ll (${i}).jpeg`
+                });
+            }
+            renderProducts('all'); // Display all products initially
+        }
+
+        /**
+         * Renders product cards based on the selected category.
+         * @param {string} category - 'all', 'short_sleeves', or 'long_sleeves'.
+         */
+        function renderProducts(category) {
+            productsGrid.innerHTML = ''; // Clear existing products
+            const filteredProducts = products.filter(product =>
+                category === 'all' || product.category === category
+            );
+
+            if (filteredProducts.length === 0) {
+                productsGrid.innerHTML = `<p class="col-span-full text-center text-gray-600">${translate('No products found for this category.')}</p>`;
+                return;
+            }
+
+            filteredProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden transform hover:-translate-y-1 relative';
+                productCard.innerHTML = `
+                    <img src="${product.imageUrl}" alt="${product.name}" class="w-full h-64 object-cover object-center rounded-t-xl cursor-pointer product-image" data-id="${product.id}">
+                    <div class="p-5 flex flex-col items-center text-center">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">${product.name}</h3>
+                        <p class="text-gray-600 text-lg font-bold mb-4">${translate('Price:')} <span class="text-blue-600">${product.retailPrice.toLocaleString()} TZS</span></p>
+                        <button class="add-to-cart-btn bg-blue-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-700 transition duration-300 shadow-md w-full" data-product-id="${product.id}" data-en="${translations.en['Add to Cart']}" data-sw="${translations.sw['Add to Cart']}">
+                            ${translate('Add to Cart')}
+                        </button>
+                    </div>
+                `;
+                productsGrid.appendChild(productCard);
+            });
+        }
+
+        /**
+         * Adds a product to the cart or increments its quantity.
+         * @param {string} productId - The ID of the product to add.
+         */
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingCartItem = cart.find(item => item.id === productId);
+
+            if (existingCartItem) {
+                existingCartItem.quantity++;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    imageUrl: product.imageUrl,
+                    category: product.category,
+                    quantity: 1
+                });
+            }
+            updateCartUI();
+        }
+
+        /**
+         * Removes a product from the cart or decrements its quantity.
+         * @param {string} productId - The ID of the product to remove.
+         */
+        function removeFromCart(productId) {
+            const existingCartItem = cart.find(item => item.id === productId);
+
+            if (existingCartItem) {
+                if (existingCartItem.quantity > 1) {
+                    existingCartItem.quantity--;
+                } else {
+                    cart = cart.filter(item => item.id !== productId);
+                }
+            }
+            updateCartUI();
+        }
+
+        /**
+         * Calculates the total cost of items in the cart, applying wholesale pricing if applicable.
+         * @returns {number} The total cost.
+         */
+        function calculateCartTotal() {
+            let total = 0;
+            let totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const useWholesale = totalQuantity >= WHOLESALE_THRESHOLD;
+
+            cart.forEach(item => {
+                const productInfo = products.find(p => p.id === item.id);
+                if (productInfo) {
+                    let price = 0;
+                    if (useWholesale) {
+                        price = productInfo.wholesalePrice;
+                    } else {
+                        price = productInfo.retailPrice;
+                    }
+                    total += price * item.quantity;
+                }
+            });
+            return total;
+        }
+
+        /**
+         * Updates the cart badge, displays cart items in the modal, and updates total.
+         */
+        function updateCartUI() {
+            // Update cart badge
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            if (totalItems > 0) {
+                cartBadge.textContent = totalItems;
+                cartBadge.classList.remove('hidden');
+            } else {
+                cartBadge.classList.add('hidden');
+            }
+
+            // Update cart modal content
+            cartItemsContainer.innerHTML = '';
+            if (cart.length === 0) {
+                emptyCartMessage.classList.remove('hidden');
+            } else {
+                emptyCartMessage.classList.add('hidden');
+                const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+                const useWholesale = totalQuantity >= WHOLESALE_THRESHOLD;
+
+                cart.forEach(item => {
+                    const productInfo = products.find(p => p.id === item.id);
+                    if (productInfo) {
+                        let itemPrice = useWholesale ? productInfo.wholesalePrice : productInfo.retailPrice;
+                        const cartItemDiv = document.createElement('div');
+                        cartItemDiv.className = 'flex items-center space-x-4 bg-gray-50 p-3 rounded-lg shadow-sm';
+                        cartItemDiv.innerHTML = `
+                            <img src="${item.imageUrl}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md flex-shrink-0 cursor-pointer cart-item-image" data-src="${item.imageUrl}">
+                            <div class="flex-grow">
+                                <h4 class="font-medium text-gray-800">${item.name}</h4>
+                                <p class="text-sm text-gray-600">${translate('Price:')} ${itemPrice.toLocaleString()} TZS</p>
+                                <p class="text-sm text-gray-600">${translate('Quantity:')} ${item.quantity}</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="bg-gray-200 text-gray-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors remove-from-cart-btn" data-product-id="${item.id}">-</button>
+                                <span class="font-semibold text-gray-800">${item.quantity}</span>
+                                <button class="bg-gray-200 text-gray-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-300 transition-colors add-to-cart-btn" data-product-id="${item.id}">+</button>
+                            </div>
+                        `;
+                        cartItemsContainer.appendChild(cartItemDiv);
+                    }
+                });
+            }
+
+            // Update total cost
+            cartTotalDisplay.textContent = `${calculateCartTotal().toLocaleString()} TZS`;
+        }
+
+        /**
+         * Opens the shopping cart modal.
+         */
+        function openCartModal() {
+            cartModal.classList.remove('hidden');
+            updateCartUI(); // Ensure cart content is up-to-date when opened
+        }
+
+        /**
+         * Closes the shopping cart modal.
+         */
+        function closeCartModal() {
+            cartModal.classList.add('hidden');
+        }
+
+        /**
+         * Opens the image magnification modal.
+         * @param {string} imageUrl - The URL of the image to magnify.
+         */
+        function openImageModal(imageUrl) {
+            magnifiedImage.src = imageUrl;
+            imageModal.classList.remove('hidden');
+        }
+
+        /**
+         * Closes the image magnification modal.
+         */
+        function closeImageModal() {
+            imageModal.classList.add('hidden');
+            magnifiedImage.src = ''; // Clear image source
+        }
+
+        /**
+         * Generates a WhatsApp checkout link and opens it.
+         */
+        function checkoutWhatsApp() {
+            if (cart.length === 0) {
+                // In a real app, you'd use a custom modal for this message.
+                // For this demonstration, we'll use a simple alert as a fallback
+                // if not using a custom modal, but it's generally avoided.
+                // As per instructions, I'll avoid alert and simulate a message here.
+                console.log(translate('Your cart is empty. Add items before checking out.'));
+                // A better approach would be to briefly show a message on the UI
+                // e.g., a small banner notification.
+                return;
+            }
+
+            let message = `${translate('Hello, I would like to order the following shirts from CHIMBO LA MASHATI [KARIAKOO]:')}\n\n`;
+            let totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const useWholesale = totalQuantity >= WHOLESALE_THRESHOLD;
+
+            cart.forEach((item, index) => {
+                const productInfo = products.find(p => p.id === item.id);
+                if (productInfo) {
+                    let itemPrice = useWholesale ? productInfo.wholesalePrice : productInfo.retailPrice;
+                    const productNameForLink = item.name.replace(/ /g, '%20'); // Replace spaces for URL
+                    message += `${index + 1}. ${item.name} (${item.quantity} x ${itemPrice.toLocaleString()} TZS) = ${(itemPrice * item.quantity).toLocaleString()} TZS\n`;
+                    // Add image link (using placeholder as product image is not hosted)
+                    message += `   Image: https://luvandasana.github.io/lmonline/${item.imageUrl}\n`;
+                }
+            });
+
+            message += `\n${translate('Overall Total:')} ${calculateCartTotal().toLocaleString()} TZS`;
+            message += `\n\n${translate('Thank you!')}`;
+
+            const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+
+            // Clear the basket after checkout
+            cart = [];
+            updateCartUI();
+            closeCartModal();
+        }
+
+        /**
+         * Translates text based on the current language.
+         * @param {string} key - The key for the translation.
+         * @returns {string} The translated text.
+         */
+        function translate(key) {
+            return translations[currentLanguage][key] || key;
+        }
+
+        /**
+         * Updates all translatable text elements on the page.
+         */
+        function updateContentLanguage() {
+            document.querySelectorAll('[data-en]').forEach(element => {
+                const enText = element.getAttribute('data-en');
+                const swText = element.getAttribute('data-sw');
+                if (currentLanguage === 'en') {
+                    element.textContent = enText;
+                } else {
+                    element.textContent = swText;
+                }
+            });
+            currentLanguageDisplay.textContent = translate(currentLanguage === 'en' ? 'English' : 'Kiswahili');
+            // Re-render products to update "Add to Cart" button text
+            const activeCategoryBtn = document.querySelector('.category-btn.active');
+            const activeCategory = activeCategoryBtn ? activeCategoryBtn.dataset.category : 'all';
+            renderProducts(activeCategory);
+            updateCartUI(); // Re-render cart to update text like 'Price:', 'Quantity:'
+        }
+
+        // --- Event Listeners ---
+
+        // Category filter buttons
+        document.querySelectorAll('.category-btn').forEach(button => {
+            button.addEventListener('click', (event) => {
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('bg-blue-600', 'text-white', 'active');
+                    btn.classList.add('bg-gray-200', 'text-gray-800');
+                });
+                event.target.classList.remove('bg-gray-200', 'text-gray-800');
+                event.target.classList.add('bg-blue-600', 'text-white', 'active');
+                renderProducts(event.target.dataset.category);
+            });
+        });
+
+        // Add to cart button (delegated event listener for dynamically added buttons)
+        productsGrid.addEventListener('click', (event) => {
+            if (event.target.classList.contains('add-to-cart-btn')) {
+                const productId = event.target.dataset.productId;
+                addToCart(productId);
+            }
+            // Image magnification from product grid
+            if (event.target.classList.contains('product-image')) {
+                openImageModal(event.target.src);
+            }
+        });
+
+        // Cart icon click to open modal
+        cartIconBtn.addEventListener('click', openCartModal);
+
+        // Close cart modal button
+        closeCartModalBtn.addEventListener('click', closeCartModal);
+
+        // Event listener for add/remove buttons inside the cart modal (delegated)
+        cartItemsContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('add-to-cart-btn')) {
+                const productId = event.target.dataset.productId;
+                addToCart(productId);
+            } else if (event.target.classList.contains('remove-from-cart-btn')) {
+                const productId = event.target.dataset.productId;
+                removeFromCart(productId);
+            } else if (event.target.classList.contains('cart-item-image')) {
+                // Image magnification from cart
+                openImageModal(event.target.dataset.src);
+            }
+        });
+
+        // Checkout via WhatsApp button
+        checkoutWhatsappBtn.addEventListener('click', checkoutWhatsApp);
+
+        // Close image modal button
+        closeImageModalBtn.addEventListener('click', closeImageModal);
+
+        // Close image modal if clicked outside image
+        imageModal.addEventListener('click', (event) => {
+            if (event.target === imageModal) {
+                closeImageModal();
+            }
+        });
+
+        // Language toggle dropdown
+        languageToggleBtn.addEventListener('click', () => {
+            languageDropdown.classList.toggle('hidden');
+        });
+
+        languageDropdown.querySelectorAll('.language-option').forEach(button => {
+            button.addEventListener('click', (event) => {
+                currentLanguage = event.target.dataset.lang;
+                updateContentLanguage();
+                languageDropdown.classList.add('hidden'); // Hide dropdown after selection
+            });
+        });
+
+        // Hide language dropdown if clicked outside
+        document.addEventListener('click', (event) => {
+            if (!languageToggleBtn.contains(event.target) && !languageDropdown.contains(event.target)) {
+                languageDropdown.classList.add('hidden');
+            }
+        });
+
+        // Initial setup on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeProducts(); // Load product data and render initial view
+            updateCartUI(); // Initialize cart badge
+            updateContentLanguage(); // Apply initial language (English)
+        });
+
+    </script>
+
+</body>
+</html>
